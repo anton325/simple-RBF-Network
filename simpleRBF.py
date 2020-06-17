@@ -30,11 +30,11 @@ class RBF:
 
         print("matrixM: "+str(matrixM)+" training outputs: "+str(trainings_outputs))
         print("Training outputs hat die shape: "+str(trainings_outputs.shape))
-        weights = np.dot(matrixM,trainOutput)
-        print("berchnet wurden die gewichte: "+str(weights))
+        self.weightsWithoutGradient = np.dot(matrixM,trainOutput)
+        print("berchnet wurden die gewichte: "+str(self.weightsWithoutGradient))
 
         # tell output layer
-        self.outputLayer.introduceWeightMatrix(weights)
+        self.outputLayer.introduceWeightMatrix(self.weightsWithoutGradient)
 
 
     
@@ -69,18 +69,21 @@ def wishFunction(x):
 
 if __name__ == "__main__":
     # Distribute centers evenly
-    centers = np.arange(0,10,0.5)
-    width = 0.35
+    distanceBetween = 1
+    centers = np.arange(0,20,distanceBetween)
+    width = distanceBetween*0.6
 
     # Determine with how many values you want to learn
-    inputs = np.arange(0,20,1)
+    inputs = np.arange(0,20,0.1)
     trainings_outputs = wishFunction(inputs)
     print("trainings outputs are: asdf " + str(trainings_outputs))
 
     # define single layers
-    myInputLayer = inputLayer(1)
+    myInputLayer = inputLayer(1,centers,width)
     myrbfLayer = RBFLayer(centers, width)
     myOutputLayer = outputLayer(1)
+
+    
 
     # get model and calculate weights
     myRbf = RBF(myInputLayer,myrbfLayer,myOutputLayer)
@@ -99,6 +102,9 @@ if __name__ == "__main__":
     #a = np.arange(0,5,0.1,dtype = float)
     #correct = wishFunction(a)
 
+    # show input neurons
+    myInputLayer.plotNeurons()
+    
     plt.plot(usedRange,correct, color = "g")
     plt.plot(usedRange,guessed, color = "r")
     plt.show()
