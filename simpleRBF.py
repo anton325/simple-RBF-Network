@@ -1,5 +1,5 @@
 from inputLayer import inputLayer
-from rbfLayer import rbfLayer
+from rbfLayer import RBFLayer
 from outputLayer import outputLayer
 import numpy as np
 
@@ -24,5 +24,5 @@ if __name__ == "__main__":
     trainings_outputs = np.sin(inputs)
 
     myInputLayer = inputLayer(1)
-    myrbfLayer = rbfLayer(centers, width)
+    myrbfLayer = RBFLayer(centers, width)
     myOutputLayer = outputLayer(1)
