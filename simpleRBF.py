@@ -5,12 +5,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class RBF:
+   
     def __init__(self,inputLayer,RBFLayer,outputLayer):
+         """
+        __ini__
+        Übergebe definierte Layers
+        """
         self.inputLayer = inputLayer
         self.RBFLayer = RBFLayer
         self.outputLayer = outputLayer
     
+    
     def calculateWeights(self,input, trainOutput):
+        """
+        calculateWeights
+        calculate the weights by getting the M matrix, obtaining the pseudo inverse and multiplying with training output
+        """
         matrixM = self.RBFLayer.outputMatrix(input)
         print("matrixM hat vor invertieren shape: "+str(matrixM.shape))
         # invert matrix
@@ -26,12 +36,23 @@ class RBF:
         self.outputLayer.introduceWeightMatrix(weights)
 
 
+    
     def guessOutput(self,scalarInput):
+        """
+        guessOutput
+        recieve single scalar value. Obtain output matrix from rbf layer 
+        And multiply with weights to get guess
+        """
         outputMatrix = self.RBFLayer.outputToScalar(scalarInput)
         res = self.outputLayer.calculateOutput(outputMatrix)
         return(res)
 
+
 def wishFunction(x):
+    """
+    wishFunction
+    determine here which function you want to realise
+    """
     y = np.array([])
     for values in x: 
         y = np.append(y,2*np.sin(values)-3*np.cos(3*values)+np.exp(-values*values))
@@ -49,17 +70,19 @@ if __name__ == "__main__":
     trainings_outputs = wishFunction(inputs)
     print("trainings outputs are: asdf " + str(trainings_outputs))
 
+    # define single layers
     myInputLayer = inputLayer(1)
     myrbfLayer = RBFLayer(centers, width)
     myOutputLayer = outputLayer(1)
 
+    # get model and calculate weights
     myRbf = RBF(myInputLayer,myrbfLayer,myOutputLayer)
     myRbf.calculateWeights(inputs,trainings_outputs)
 
 
+    print("start gathering values")
     correct = np.array([])
     guessed = np.array([])
-    print("start gathering values")
     for testInput in np.arange(0,5,0.1):
         #print("Zum Input: "+str(testInput)+" berechnet das Netz: "+str(myRbf.guessOutput(testInput))+ " erwartet wurde: "+str(np.sin(testInput)))
         guessed = np.append(guessed, myRbf.guessOutput(testInput))
