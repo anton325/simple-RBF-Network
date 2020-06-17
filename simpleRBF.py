@@ -3,6 +3,7 @@ from rbfLayer import RBFLayer
 from outputLayer import outputLayer
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 class RBF:
     """
@@ -51,6 +52,10 @@ class RBF:
 
 
     def gradientDescent(self, teachingInput, teachingOutput, epoch):
+        #start timer
+        t1 = time.time()
+
+
         # lernrate zwischen 0.01 und 0.9
         print("gradient descent")
         counter = 0
@@ -66,7 +71,7 @@ class RBF:
                     center = self.RBFLayer.centers[neuron]
                     eingang =  teachingInput[i]
                     activation = self.RBFLayer.getOutputOfSingleNeuron(center , eingang)
-                    print("Prüfe für Eingang: "+str(eingang) +"für neuron mit Zentrum: "+str(center))
+                    print("Prüfe in Durchlauf: "+str(counter)+" von "+str(epoch)+ " für Eingang: "+str(eingang))
                     # what would the network usually guess?
                     guess = self.guessOutput(teachingInput[i])
                     print("guess would have been: "+str(guess)+ " it should have been: "+str(teachingOutput[i]))
@@ -84,7 +89,9 @@ class RBF:
             counter = counter + 1
 
         # tell output layer about new weights
-        self.outputLayer.introduceWeightMatrix(self.weightsWithGradient)    
+        self.outputLayer.introduceWeightMatrix(self.weightsWithGradient)   
+        t2 = time.time()
+        print("Gradient descent took: "+str(t2-t1))
 
 
 
@@ -94,12 +101,9 @@ def wishFunction(x):
     wishFunction
     determine here which function you want to realise
     """
-
     if not (type(x) == type(np.array([]))):
         #print("kein array")
         return wishFunction(np.array([x]))
-        
-
     y = np.array([])
     for values in x: 
         y = np.append(y,
@@ -108,6 +112,7 @@ def wishFunction(x):
 
 def saveWeightsAndCenters(weights, centers):
     np.savez("rbf.npz",name1 = weights, name2 = centers)
+    print("weights saved")
 
 def plotWithoutGrad(x):
     correct = np.array([])
@@ -122,7 +127,7 @@ def plotWithoutGrad(x):
     
     plt.plot(usedRange,correct, color = "g")
     plt.plot(usedRange,guessed, color = "r")
-    plt.show()
+    #plt.show()
     return guessed
 
 def plotWithGrad(x,oldGuess):
@@ -151,7 +156,7 @@ if __name__ == "__main__":
     xmax = 20
 
     # Distribute centers evenly
-    distanceBetween = 0.5
+    distanceBetween = 0.7
     centers = np.arange(0,xmax,distanceBetween)
     width = distanceBetween*0.6
 
@@ -171,14 +176,17 @@ if __name__ == "__main__":
     # plot initial fit
     plotRange =np.arange(0,xmax,0.01)
     oldGuess = plotWithoutGrad(plotRange)
-    
+
     # grad descent
-    numEpochs = 50
+    numEpochs = 10
     gradRange = np.arange(0,xmax,0.25)
     newWeights = performeGrad(myRbf, numEpochs, gradRange)
 
+    # save calculated weights
     saveWeightsAndCenters(newWeights,centers)
 
+    # plot with new AND old weights
     plotWithGrad(plotRange,oldGuess)
+   
 
 
