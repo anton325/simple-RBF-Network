@@ -2,6 +2,7 @@ from inputLayer import inputLayer
 from rbfLayer import RBFLayer
 from outputLayer import outputLayer
 import numpy as np
+import matplotlib.pyplot as plt
 
 class RBF:
     def __init__(self,inputLayer,RBFLayer,outputLayer):
@@ -30,14 +31,23 @@ class RBF:
         res = self.outputLayer.calculateOutput(outputMatrix)
         return(res)
 
+def wishFunction(x):
+    y = np.array([])
+    for values in x: 
+        y = np.append(y,2*np.sin(values)-3*np.cos(3*values)+np.exp(-values*values))
+    return y
 
 
 
 if __name__ == "__main__":
-    centers = np.arange(0.5,5.6,1)
-    width = 0.7
-    inputs = np.arange(0,6,0.5)
-    trainings_outputs = np.sin(inputs)
+    # Distribute centers evenly
+    centers = np.arange(0.1,5.6,0.3)
+    width = 0.24
+
+    # Determine with how many values you want to learn
+    inputs = np.arange(0,6,0.01)
+    trainings_outputs = wishFunction(inputs)
+    print("trainings outputs are: asdf " + str(trainings_outputs))
 
     myInputLayer = inputLayer(1)
     myrbfLayer = RBFLayer(centers, width)
@@ -49,10 +59,14 @@ if __name__ == "__main__":
 
     correct = np.array([])
     guessed = np.array([])
+    print("start gathering values")
     for testInput in np.arange(0,5,0.1):
-        print("Zum Input: "+str(testInput)+" berechnet das Netz: "+str(myRbf.guessOutput(testInput))+ " erwartet wurde: "+str(np.sin(testInput)))
-        correct = np.append(correct, np.sin(testInput))
+        #print("Zum Input: "+str(testInput)+" berechnet das Netz: "+str(myRbf.guessOutput(testInput))+ " erwartet wurde: "+str(np.sin(testInput)))
         guessed = np.append(guessed, myRbf.guessOutput(testInput))
+    
+    a = np.arange(0,5,0.1,dtype = float)
+    correct = wishFunction(a)
 
-    print(correct)
-    print(guessed)
+    plt.plot(correct, color = "g")
+    plt.plot(guessed, color = "r")
+    plt.show()
