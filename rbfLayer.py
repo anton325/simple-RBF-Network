@@ -1,6 +1,6 @@
 import numpy as np
 
-class rbfLayer:
+class RBFLayer:
     def __init__(self, centers, widths):
         self.centers = centers
         self.widths = widths
@@ -30,7 +30,17 @@ class rbfLayer:
         return out
 
 
-    
+    def outputToScalar(self,scalar):
+        singleValues = np.array([])
+        for j in range(np.size(self.centers)):
+            dis = self.distance(scalar,self.centers[j])
+            gaus = self.gaussian(dis)
+            singleValues = np.append(singleValues,gaus)
+        
+        return np.sum(singleValues)
+
+            
+
     def distance(self,x,center):
         dis = np.abs(x-center)
         print("center: "+str(center)+" x: "+str(x))
@@ -63,6 +73,6 @@ if __name__ == "__main__":
     for x,y in enumerate(inputs,1):
         # x wird 1, y wird inputs
         print(str(x)+" "+str(y))
-    rbfL = rbfLayer(centers,widths)
+    rbfL = RBFLayer(centers,widths)
     print(rbfL.outputMatrix(inputs))
     
