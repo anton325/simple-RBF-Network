@@ -1,3 +1,5 @@
+import numpy as np
+
 class outputLayer:
     def __init__(self,numberNeurons):
         self.numberNeurons = numberNeurons
@@ -9,6 +11,9 @@ class outputLayer:
     
 
     def calculateOutput(self,resultFromRBFLayer):
+        result = 0
         for i in range(np.size(self.weightMatrix)):
-            print("Hi")            
+            result = result + resultFromRBFLayer[i]*self.weightMatrix[i]
+            print("resultat: "+str(result))
+        return result
     

@@ -22,22 +22,25 @@ class RBFLayer:
                 out = np.append(out,gaus)
                 print("")
             print("")
+        print("out direkt nach schleifen: \n"+str(out))
         
         # reshape output
-        # reshape: anzahl spalten = anzahl neuronen, anzahl zeilen = anzahl inputs
+        # reshape: anzahl spalten = anzahl neuronen
+        #          anzahl zeilen = anzahl inputs
         out = np.reshape(out,(np.size(input),np.size(self.centers)))
-        out = out.T
+        #out = out.T
         return out
 
 
     def outputToScalar(self,scalar):
+        print("scalar: "+str(scalar))
         singleValues = np.array([])
         for j in range(np.size(self.centers)):
             dis = self.distance(scalar,self.centers[j])
             gaus = self.gaussian(dis)
             singleValues = np.append(singleValues,gaus)
         
-        return np.sum(singleValues)
+        return singleValues
 
             
 
@@ -53,7 +56,9 @@ class RBFLayer:
     def gaussian(self,rh):
         exponent = -np.square(rh)/(2*np.square(self.widths))
         print("exponent: "+str(exponent))
-        return np.exp(exponent)
+        res = np.exp(exponent)
+        print("gaus: "+str(res))
+        return res
 
 
 
@@ -69,10 +74,13 @@ if __name__ == "__main__":
     trainings_outputs = np.sin(inputs)
 
     widths = 0.7 
-    print(centers)
     for x,y in enumerate(inputs,1):
         # x wird 1, y wird inputs
         print(str(x)+" "+str(y))
     rbfL = RBFLayer(centers,widths)
+
     print(rbfL.outputMatrix(inputs))
+    print(centers)
+
+    print("end")
     
