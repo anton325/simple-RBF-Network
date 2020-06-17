@@ -14,6 +14,6 @@ class outputLayer:
         result = 0
         for i in range(np.size(self.weightMatrix)):
             result = result + resultFromRBFLayer[i]*self.weightMatrix[i]
-            print("resultat: "+str(result))
+            #print("resultat: "+str(result))
         return result
     

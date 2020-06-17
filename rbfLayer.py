@@ -6,6 +6,7 @@ class RBFLayer:
         self.widths = widths
         print("centers: "+str(self.centers))
         print("width: "+str(self.widths))
+        self.numberOfNeurons = np.size(self.centers)
 
     def outputMatrix(self,input):
         out = np.array([])
@@ -14,9 +15,9 @@ class RBFLayer:
             for j in range(np.size(self.centers)):
                 # first do it all for input1, than for input2...
                 dis = self.distance(input[i],self.centers[j])
-                print("dis: "+str(dis))
+                #print("dis: "+str(dis))
                 gaus = self.gaussian(dis)
-                print("gaus: "+str(gaus))
+                #print("gaus: "+str(gaus))
                 if gaus<0.001:
                     gaus = 0
                 out = np.append(out,gaus)
@@ -32,21 +33,31 @@ class RBFLayer:
         return out
 
 
+    """
+    Get missing output to arbitrary scalar
+    """
     def outputToScalar(self,scalar):
-        print("scalar: "+str(scalar))
+        #print("scalar: "+str(scalar))
         singleValues = np.array([])
         for j in range(np.size(self.centers)):
-            dis = self.distance(scalar,self.centers[j])
-            gaus = self.gaussian(dis)
-            singleValues = np.append(singleValues,gaus)
-        
+            neuronOutput = self.getOutputOfSingleNeuron(self.centers[j], scalar)
+            singleValues = np.append(singleValues, neuronOutput)
         return singleValues
+
+    """
+    get output of single neuron
+    """
+    def getOutputOfSingleNeuron(self,center,scalar):
+        dis = self.distance(scalar,center)
+        gaus = self.gaussian(dis)
+        return gaus
+
 
             
 
     def distance(self,x,center):
         dis = np.abs(x-center)
-        print("center: "+str(center)+" x: "+str(x))
+        #print("center: "+str(center)+" x: "+str(x))
         """for xValue,c in x,center:
             dis = dis + np.square(xValue-c)
         dis = np.sqrt(dis)"""
@@ -55,10 +66,13 @@ class RBFLayer:
 
     def gaussian(self,rh):
         exponent = -np.square(rh)/(2*np.square(self.widths))
-        print("exponent: "+str(exponent))
+        #print("exponent: "+str(exponent))
         res = np.exp(exponent)
-        print("gaus: "+str(res))
+        #print("gaus: "+str(res))
         return res
+
+    
+
 
 
 

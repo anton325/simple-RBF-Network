@@ -13,6 +13,7 @@ class inputLayer:
         ax.cla()
         for i in range(np.size(self.centers)):
             ax.add_artist(plt.Circle((self.centers[i],0),self.width, color = "b"))
-        print("plot circles")
+            
+        print("Plot circles")
         ax.plot()
 
