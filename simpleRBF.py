@@ -5,12 +5,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class RBF:
-   
+    """
+    __ini__
+    Übergebe definierte Layers
+    """
+        
     def __init__(self,inputLayer,RBFLayer,outputLayer):
-         """
-        __ini__
-        Übergebe definierte Layers
-        """
+         
         self.inputLayer = inputLayer
         self.RBFLayer = RBFLayer
         self.outputLayer = outputLayer
@@ -53,6 +54,12 @@ def wishFunction(x):
     wishFunction
     determine here which function you want to realise
     """
+
+    if not (type(x) == type(np.array([]))):
+        print("kein array")
+        return wishFunction(np.array([x]))
+        
+
     y = np.array([])
     for values in x: 
         y = np.append(y,2*np.sin(values)-3*np.cos(3*values)+np.exp(-values*values))
@@ -62,11 +69,11 @@ def wishFunction(x):
 
 if __name__ == "__main__":
     # Distribute centers evenly
-    centers = np.arange(0.1,5.6,0.3)
-    width = 0.24
+    centers = np.arange(0,10,0.5)
+    width = 0.35
 
     # Determine with how many values you want to learn
-    inputs = np.arange(0,6,0.01)
+    inputs = np.arange(0,20,1)
     trainings_outputs = wishFunction(inputs)
     print("trainings outputs are: asdf " + str(trainings_outputs))
 
@@ -83,13 +90,15 @@ if __name__ == "__main__":
     print("start gathering values")
     correct = np.array([])
     guessed = np.array([])
-    for testInput in np.arange(0,5,0.1):
+    usedRange = np.arange(0,14,0.1)
+    for testInput in usedRange:
         #print("Zum Input: "+str(testInput)+" berechnet das Netz: "+str(myRbf.guessOutput(testInput))+ " erwartet wurde: "+str(np.sin(testInput)))
         guessed = np.append(guessed, myRbf.guessOutput(testInput))
+        correct = np.append(correct, wishFunction(testInput))
     
-    a = np.arange(0,5,0.1,dtype = float)
-    correct = wishFunction(a)
+    #a = np.arange(0,5,0.1,dtype = float)
+    #correct = wishFunction(a)
 
-    plt.plot(correct, color = "g")
-    plt.plot(guessed, color = "r")
+    plt.plot(usedRange,correct, color = "g")
+    plt.plot(usedRange,guessed, color = "r")
     plt.show()
