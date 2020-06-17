@@ -8,6 +8,11 @@ class RBFLayer:
         print("width: "+str(self.widths))
         self.numberOfNeurons = np.size(self.centers)
 
+    """
+    get output matrix. 
+    columns: the neurons
+    rows: response of the neurons to a given input
+    """
     def outputMatrix(self,input):
         out = np.array([])
         print("")

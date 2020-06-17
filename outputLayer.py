@@ -5,11 +5,16 @@ class outputLayer:
         self.numberNeurons = numberNeurons
         
     
+    """
+    copy weight matrix
+    """
     def introduceWeightMatrix(self, weightMatrix):
         self.weightMatrix = weightMatrix
 
     
-
+    """
+    calculate output using the weights and the results from the rbf layer
+    """
     def calculateOutput(self,resultFromRBFLayer):
         result = 0
         for i in range(np.size(self.weightMatrix)):

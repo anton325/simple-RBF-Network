@@ -7,7 +7,10 @@ class inputLayer:
         self.centers = centers
         self.width = width
 
-    
+
+    """
+    draw the neurons on the input (1D)
+    """    
     def plotNeurons(self):
         ax = plt.gca()
         ax.cla()

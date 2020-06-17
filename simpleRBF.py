@@ -38,7 +38,9 @@ class RBF:
         self.outputLayer.introduceWeightMatrix(self.weightsWithoutGradient)
 
 
-    
+    """
+    Obtain output of rbf network to given scalar input
+    """
     def guessOutput(self,scalarInput):
         """
         guessOutput
