@@ -60,8 +60,9 @@ class RBFLayer:
         return gaus
 
 
-            
-
+    """
+    calculate distance between input and neuron
+    """
     def distance(self,x,center):
         dis = np.abs(x-center)
         #print("center: "+str(center)+" x: "+str(x))
@@ -70,7 +71,9 @@ class RBFLayer:
         dis = np.sqrt(dis)"""
         return dis
 
-
+    """
+    calculate output of neuron
+    """
     def gaussian(self,rh):
         exponent = -np.square(rh)/(2*np.square(self.widths))
         #print("exponent: "+str(exponent))
@@ -90,15 +93,6 @@ class RBFLayer:
         print("Plot circles")
         ax.plot()
 
-    
-
-
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
@@ -114,6 +108,5 @@ if __name__ == "__main__":
 
     print(rbfL.outputMatrix(inputs))
     print(centers)
-
     print("end")
     

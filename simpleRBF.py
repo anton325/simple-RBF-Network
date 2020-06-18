@@ -4,6 +4,7 @@ from outputLayer import outputLayer
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import os
 
 class RBF:
     """
@@ -57,7 +58,6 @@ class RBF:
         #start timer
         t1 = time.time()
 
-
         # lernrate zwischen 0.01 und 0.9
         print("gradient descent")
         counter = 0
@@ -66,14 +66,15 @@ class RBF:
         # calculate delta
         speed = 1
         while counter < epoch:
-            speed = 0.9 * speed
+            speed = 0.95 * speed
             for i in range(np.size(teachingInput)):
                 for neuron in range(self.RBFLayer.numberOfNeurons):
-                    # calculate activation:
+                    # calculate activation of the single neuron:
                     center = self.RBFLayer.centers[neuron]
                     eingang =  teachingInput[i]
                     activation = self.RBFLayer.getOutputOfSingleNeuron(center , eingang)
-                    print("Prüfe in Durchlauf: "+str(counter)+" von "+str(epoch)+ " für Eingang: "+str(eingang))
+                    print("Prüfe in Durchlauf: "+str(counter+1)+" von "+str(epoch)+ " für Eingang: "+str(eingang))
+
                     # what would the network usually guess?
                     guess = self.guessOutput(teachingInput[i])
                     print("guess would have been: "+str(guess)+ " it should have been: "+str(teachingOutput[i]))
@@ -85,7 +86,12 @@ class RBF:
                     print("Zum Input: "+str(teachingInput[i])+" ist der Unterschied: "+str(diff)+" grad: "+str(grad))
                     # update the respective weight:
                     self.weightsWithGradient[neuron] = self.weightsWithGradient[neuron]+grad
+
+                    
                 i = i + 1
+
+            #tell outputlayer
+            self.outputLayer.introduceWeightMatrix(self.weightsWithGradient)
 
             # increment counter
             counter = counter + 1
@@ -109,7 +115,8 @@ def wishFunction(x):
     y = np.array([])
     for values in x: 
         y = np.append(y,
-                    2*np.sin(values) -3*np.cos(3*values) +np.exp(-values*values) -2.3*np.sin(3*values))
+                    #2*np.sin(values) -3*np.cos(3*values) +np.exp(-values*values) -2.3*np.sin(3*values))
+                    np.exp(-(values-4)*(values-4))+np.exp(-3*(values-1))+np.log(values))
     return y
 
 def saveConfig(model, distance, width):
@@ -147,7 +154,7 @@ def plotWithoutGrad(myRbf,x):
     #plt.show()
     return guessed
 
-def plotWithGrad(myRbf,x,oldGuess):
+def plotWithGrad(myRbf,x,oldGuess,savePlot,epochs):
     correct = np.array([])
     newGuessed = np.array([])
     usedRange = x
@@ -160,8 +167,16 @@ def plotWithGrad(myRbf,x,oldGuess):
     
     plt.plot(usedRange,oldGuess, color = "r")
     plt.plot(usedRange,correct, color = "g")
-    plt.plot(usedRange,newGuessed, color = "b")
-    plt.show()
+    plt.plot(usedRange,newGuessed, color = "b")   
+
+    if savePlot == True:
+        script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
+        rel_path = "Plots/onlineLearning3/Epochs "+str(epochs)+".png"
+        abs_file_path = os.path.join(script_dir, rel_path)      
+        plt.savefig(abs_file_path)
+        print("Plot saved")
+    else:
+        plt.show()
 
 
 def performeGrad(rbf,numEpochs, usedRange):
@@ -180,14 +195,14 @@ def getModel(numInputNeurons,centers,width,numOutputNeurons):
     return(RBF(myInputLayer,myrbfLayer,myOutputLayer))
 
 
-def startFromScrap(xMax,epochs):
+def startFromScrap(xMax,epochs,savePlot):
     # Determine with how many values you want to estimate first set of weights
     xmax = xMax
-    inputs = np.arange(0,xmax,1)
+    inputs = np.arange(0.5,xmax,0.5)
     trainings_outputs = wishFunction(inputs)
 
     # Distribute centers evenly
-    distanceBetween = 0.7
+    distanceBetween = 0.3
     centers = np.arange(0,xmax,distanceBetween)
     width = distanceBetween*0.6
     # get Model
@@ -199,26 +214,31 @@ def startFromScrap(xMax,epochs):
     myRbf.calculateWeights(inputs,trainings_outputs)
 
     # plot initial fit with only the estimated weights
-    plotRange =np.arange(0,xmax,0.01)
+    plotRange =np.arange(0.5,xmax,0.001)
     oldGuess = plotWithoutGrad(myRbf,plotRange)
 
     # Performe grad descent
     numEpochs = epochs
-    gradRange = np.arange(0,xmax,0.25)
+    gradRange = np.arange(0.5,xmax,0.5)
     performeGrad(myRbf, numEpochs, gradRange)
 
     # save calculated weights
-    saveConfig(myRbf, distanceBetween,width)
+    #saveConfig(myRbf, distanceBetween,width)
 
      # plot with new AND old weights
-    plotWithGrad(myRbf,plotRange,oldGuess)
+    plotWithGrad(myRbf,plotRange,oldGuess,savePlot,numEpochs)
+
 
 
 
 
 if __name__ == "__main__":
-    startFromScrap(20,10)
-
+    #startFromScrap(14,1,True)
+    # get plots with respect to numEpochs
+    #for epoch in range(30):
+    startFromScrap(15,10,False)
+    #plt.plot(wishFunction(np.arange(0.5,15,0.5)))
+    #plt.show()
     # load weights and centers
     #weights,centers = loadWeights()
     #myRbf.outputLayer.introduceWeightMatrix(weights)
