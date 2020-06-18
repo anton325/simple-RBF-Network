@@ -3,6 +3,7 @@ import numpy as np
 class outputLayer:
     def __init__(self,numberNeurons):
         self.numberNeurons = numberNeurons
+        self.weightMatrix = np.array([])
         
     
     """

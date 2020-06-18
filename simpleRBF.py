@@ -29,8 +29,8 @@ class RBF:
         matrixM = np.linalg.pinv(matrixM) # get pseudoinverse
         print("matrixM hat NACH invertieren shape: "+str(matrixM.shape))
 
-        print("matrixM: "+str(matrixM)+" training outputs: "+str(trainings_outputs))
-        print("Training outputs hat die shape: "+str(trainings_outputs.shape))
+        #print("matrixM: "+str(matrixM)+" training outputs: "+str(trainings_outputs))
+        #print("Training outputs hat die shape: "+str(trainings_outputs.shape))
         self.weightsWithoutGradient = np.dot(matrixM,trainOutput)
         print("berchnet wurden die gewichte: "+str(self.weightsWithoutGradient))
 
@@ -93,7 +93,7 @@ class RBF:
         # tell output layer about new weights
         self.outputLayer.introduceWeightMatrix(self.weightsWithGradient)   
         t2 = time.time()
-        print("Gradient descent took: "+str(t2-t1))
+        print("Gradient descent took: "+str(t2-t1)+" s")
 
 
 
@@ -112,11 +112,26 @@ def wishFunction(x):
                     2*np.sin(values) -3*np.cos(3*values) +np.exp(-values*values) -2.3*np.sin(3*values))
     return y
 
-def saveWeightsAndCenters(weights, centers):
-    np.savez("rbf.npz",name1 = weights, name2 = centers)
-    print("weights saved")
+def saveConfig(model, distance, width):
+    neurons = np.array([distance,width])
+    np.savez("rbf.npz",name1 = model.outputLayer.weightMatrix, name2 = model.RBFLayer.centers, name3 = neurons)
+    print("config saved")
 
-def plotWithoutGrad(x):
+def loadModel():
+    # get data
+    data = np.load("rbf.npz")
+    weights = data["name1"]
+    centers = data["name2"]
+    neurons = data["name3"]
+    distanceBetween = neurons[0]
+    width = neurons[1]
+    # get model
+    loadedModel = getModel(1,centers,width,1)
+    # train model
+    loadedModel.outputLayer.introduceWeightMatrix(weights)
+    return loadedModel
+
+def plotWithoutGrad(myRbf,x):
     correct = np.array([])
     guessed = np.array([])
     usedRange = x
@@ -125,14 +140,14 @@ def plotWithoutGrad(x):
         correct = np.append(correct, wishFunction(testInput))
     
     # show input neurons
-    myInputLayer.plotNeurons()
+    myRbf.RBFLayer.plotNeurons()
     
     plt.plot(usedRange,correct, color = "g")
     plt.plot(usedRange,guessed, color = "r")
     #plt.show()
     return guessed
 
-def plotWithGrad(x,oldGuess):
+def plotWithGrad(myRbf,x,oldGuess):
     correct = np.array([])
     newGuessed = np.array([])
     usedRange = x
@@ -141,54 +156,74 @@ def plotWithGrad(x,oldGuess):
         correct = np.append(correct, wishFunction(testInput))
     
     # show input neurons
-    myInputLayer.plotNeurons()
+    myRbf.RBFLayer.plotNeurons()
     
     plt.plot(usedRange,oldGuess, color = "r")
     plt.plot(usedRange,correct, color = "g")
     plt.plot(usedRange,newGuessed, color = "b")
     plt.show()
 
-def performeGrad(rbf,numEpoch, usedRange):
+
+def performeGrad(rbf,numEpochs, usedRange):
+    # performe grad
     rbf.gradientDescent(usedRange, wishFunction(usedRange), numEpochs)
-    return rbf.weightsWithGradient
+    # save new weights
+    rbf.outputLayer.introduceWeightMatrix(rbf.weightsWithGradient)
+
+def getModel(numInputNeurons,centers,width,numOutputNeurons):
+     # define single layers
+    myInputLayer = inputLayer(1)
+    myrbfLayer = RBFLayer(centers, width)
+    myOutputLayer = outputLayer(1)
+
+    # get model
+    return(RBF(myInputLayer,myrbfLayer,myOutputLayer))
 
 
-
-if __name__ == "__main__":
-    xmax = 20
+def startFromScrap(xMax,epochs):
+    # Determine with how many values you want to estimate first set of weights
+    xmax = xMax
+    inputs = np.arange(0,xmax,1)
+    trainings_outputs = wishFunction(inputs)
 
     # Distribute centers evenly
     distanceBetween = 0.7
     centers = np.arange(0,xmax,distanceBetween)
     width = distanceBetween*0.6
+    # get Model
+    myRbf = getModel(1,centers,width,1)
 
-    # Determine with how many values you want to estimate first set of weights
-    inputs = np.arange(0,xmax,1)
-    trainings_outputs = wishFunction(inputs)
+    
 
-    # define single layers
-    myInputLayer = inputLayer(1,centers,width)
-    myrbfLayer = RBFLayer(centers, width)
-    myOutputLayer = outputLayer(1)
-
-    # get model and calculate weights
-    myRbf = RBF(myInputLayer,myrbfLayer,myOutputLayer)
+    # get weights
     myRbf.calculateWeights(inputs,trainings_outputs)
 
-    # plot initial fit
+    # plot initial fit with only the estimated weights
     plotRange =np.arange(0,xmax,0.01)
-    oldGuess = plotWithoutGrad(plotRange)
+    oldGuess = plotWithoutGrad(myRbf,plotRange)
 
-    # grad descent
-    numEpochs = 10
+    # Performe grad descent
+    numEpochs = epochs
     gradRange = np.arange(0,xmax,0.25)
-    newWeights = performeGrad(myRbf, numEpochs, gradRange)
+    performeGrad(myRbf, numEpochs, gradRange)
 
     # save calculated weights
-    saveWeightsAndCenters(newWeights,centers)
+    saveConfig(myRbf, distanceBetween,width)
 
-    # plot with new AND old weights
-    plotWithGrad(plotRange,oldGuess)
+     # plot with new AND old weights
+    plotWithGrad(myRbf,plotRange,oldGuess)
+
+
+
+
+if __name__ == "__main__":
+    startFromScrap(20,10)
+
+    # load weights and centers
+    #weights,centers = loadWeights()
+    #myRbf.outputLayer.introduceWeightMatrix(weights)
+
+   
    
 
 

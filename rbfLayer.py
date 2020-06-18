@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 class RBFLayer:
     def __init__(self, centers, widths):
@@ -75,6 +77,18 @@ class RBFLayer:
         res = np.exp(exponent)
         #print("gaus: "+str(res))
         return res
+
+    """
+    draw the neurons on the input (1D)
+    """    
+    def plotNeurons(self):
+        ax = plt.gca()
+        ax.cla()
+        for i in range(np.size(self.centers)):
+            ax.add_artist(plt.Circle((self.centers[i],0),self.widths, color = "b"))
+        
+        print("Plot circles")
+        ax.plot()
 
     
 
