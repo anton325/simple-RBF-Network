@@ -1,21 +1,25 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 class RBFLayer:
     def __init__(self, centers, widths):
+        """
+        save centers and widths
+        save number of neurons
+        """
         self.centers = centers
         self.widths = widths
         print("centers: "+str(self.centers))
         print("width: "+str(self.widths))
         self.numberOfNeurons = np.size(self.centers)
 
-    """
-    get output matrix. 
-    columns: the neurons
-    rows: response of the neurons to a given input
-    """
+    
     def outputMatrix(self,input):
+        """
+        get output matrix. 
+        columns: the neurons
+        rows: response of the neurons to a given input
+        """
         out = np.array([])
         print("")
         for i in range(np.size(input)):
@@ -30,20 +34,20 @@ class RBFLayer:
                 out = np.append(out,gaus)
                 print("")
             print("")
-        print("out direkt nach schleifen: \n"+str(out))
-        
+        print("Activation matrix of rbf layer: \n"+str(out))
+
         # reshape output
         # reshape: anzahl spalten = anzahl neuronen
         #          anzahl zeilen = anzahl inputs
         out = np.reshape(out,(np.size(input),np.size(self.centers)))
-        #out = out.T
         return out
 
 
-    """
-    Get missing output to arbitrary scalar
-    """
+  
     def outputToScalar(self,scalar):
+        """
+        Get missing output to arbitrary scalar
+        """
         #print("scalar: "+str(scalar))
         singleValues = np.array([])
         for j in range(np.size(self.centers)):
@@ -51,19 +55,22 @@ class RBFLayer:
             singleValues = np.append(singleValues, neuronOutput)
         return singleValues
 
-    """
-    get output of single neuron
-    """
+    
     def getOutputOfSingleNeuron(self,center,scalar):
+        """
+        get output of single neuron
+        @center: which neuron
+        """
         dis = self.distance(scalar,center)
         gaus = self.gaussian(dis)
         return gaus
 
 
-    """
-    calculate distance between input and neuron
-    """
+    
     def distance(self,x,center):
+        """
+        calculate distance between input and neuron
+        """
         dis = np.abs(x-center)
         #print("center: "+str(center)+" x: "+str(x))
         """for xValue,c in x,center:
@@ -71,20 +78,22 @@ class RBFLayer:
         dis = np.sqrt(dis)"""
         return dis
 
-    """
-    calculate output of neuron
-    """
+    
     def gaussian(self,rh):
+        """
+        calculate output of neuron
+        """
         exponent = -np.square(rh)/(2*np.square(self.widths))
         #print("exponent: "+str(exponent))
         res = np.exp(exponent)
         #print("gaus: "+str(res))
         return res
 
-    """
-    draw the neurons on the input (1D)
-    """    
+    
     def plotNeurons(self):
+        """
+        draw the neurons on the input (1D)
+        """    
         ax = plt.gca()
         ax.cla()
         for i in range(np.size(self.centers)):
