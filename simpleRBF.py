@@ -7,41 +7,36 @@ import time
 import os
 
 class RBF:
-    """
-    __ini__
-    Übergebe definierte Layers
-    """
+   
         
     def __init__(self,inputLayer,RBFLayer,outputLayer):
-         
+        """
+        __init__
+        Save already defined layers
+        """
         self.inputLayer = inputLayer
         self.RBFLayer = RBFLayer
         self.outputLayer = outputLayer
     
-    
+  
     def calculateWeights(self,input, trainOutput):
         """
         calculateWeights
-        calculate the weights by getting the M matrix, obtaining the pseudo inverse and multiplying with training output
+        calculate the weights by getting the M matrix from the rbflayer, obtaining the pseudo inverse and multiplying with training output (the desired output)
         """
-        matrixM = self.RBFLayer.outputMatrix(input)
-        print("matrixM hat vor invertieren shape: "+str(matrixM.shape))
-        # invert matrix
-        matrixM = np.linalg.pinv(matrixM) # get pseudoinverse
-        print("matrixM hat NACH invertieren shape: "+str(matrixM.shape))
 
-        #print("matrixM: "+str(matrixM)+" training outputs: "+str(trainings_outputs))
-        #print("Training outputs hat die shape: "+str(trainings_outputs.shape))
-        self.weightsWithoutGradient = np.dot(matrixM,trainOutput)
-        print("berchnet wurden die gewichte: "+str(self.weightsWithoutGradient))
+        matrixM = self.RBFLayer.outputMatrix(input)
+
+        matrixM = np.linalg.pinv(matrixM) # get pseudoinverse
+
+        self.weightsWithoutGradient = np.dot(matrixM,trainOutput) # multiply M with training output
+        print("we calculated the weights: \n"+str(self.weightsWithoutGradient))
 
         # tell output layer
         self.outputLayer.introduceWeightMatrix(self.weightsWithoutGradient)
 
 
-    """
-    Obtain output of rbf network to given scalar input
-    """
+
     def guessOutput(self,scalarInput):
         """
         guessOutput
@@ -49,52 +44,58 @@ class RBF:
         And multiply with weights to get guess
         """
         outputMatrix = self.RBFLayer.outputToScalar(scalarInput)
-        res = self.outputLayer.calculateOutput(outputMatrix)
-        return(res)
+        result = self.outputLayer.calculateOutput(outputMatrix)
+        return result
 
 
 
     def gradientDescent(self, teachingInput, teachingOutput, epoch):
+        """
+        gradientDescent
+        perform a gradient descent algorithm. In each epoch calculate the differences between output of the network and the desired output
+        Adjust the weights accordingly
+        """
         #start timer
         t1 = time.time()
 
-        # lernrate zwischen 0.01 und 0.9
-        print("gradient descent")
+        # speed between 0.01 and 0.9 (starting at 0.9 and decreasing)
+        speed = 0.9
+
+        print("perform gradient descent")
         counter = 0
         self.weightsWithGradient = self.weightsWithoutGradient
 
-        # calculate delta
-        speed = 1
         while counter < epoch:
-            speed = 0.95 * speed
             for i in range(np.size(teachingInput)):
+                # for each input
                 for neuron in range(self.RBFLayer.numberOfNeurons):
-                    # calculate activation of the single neuron:
+                    # for each neuron
+
+                    # calculate activation of this single neuron:
                     center = self.RBFLayer.centers[neuron]
-                    eingang =  teachingInput[i]
-                    activation = self.RBFLayer.getOutputOfSingleNeuron(center , eingang)
-                    print("Prüfe in Durchlauf: "+str(counter+1)+" von "+str(epoch)+ " für Eingang: "+str(eingang))
+                    input =  teachingInput[i]
+                    activation = self.RBFLayer.getOutputOfSingleNeuron(center , input)
+                    print("Testing in iteration: "+str(counter+1)+" of "+str(epoch)+ " input: "+str(input))
 
                     # what would the network usually guess?
                     guess = self.guessOutput(teachingInput[i])
                     print("guess would have been: "+str(guess)+ " it should have been: "+str(teachingOutput[i]))
+
                     # calculate difference
                     diff = teachingOutput[i]-guess
                     # calculate gradient
                     grad = speed*diff*activation
 
-                    print("Zum Input: "+str(teachingInput[i])+" ist der Unterschied: "+str(diff)+" grad: "+str(grad))
+                    print("For input: "+str(teachingInput[i])+" the difference is: "+str(diff)+" and the gradient is: "+str(grad))
                     # update the respective weight:
                     self.weightsWithGradient[neuron] = self.weightsWithGradient[neuron]+grad
-
-                    
-                i = i + 1
-
-            #tell outputlayer
+            #tell outputlayer new weights
             self.outputLayer.introduceWeightMatrix(self.weightsWithGradient)
-
             # increment counter
             counter = counter + 1
+            # adjust speed
+            speed = 0.95 * speed
+
 
         # tell output layer about new weights
         self.outputLayer.introduceWeightMatrix(self.weightsWithGradient)   
@@ -110,13 +111,13 @@ def wishFunction(x):
     determine here which function you want to realise
     """
     if not (type(x) == type(np.array([]))):
-        #print("kein array")
+        #print("Input is not an array (as it should be)")
         return wishFunction(np.array([x]))
     y = np.array([])
     for values in x: 
         y = np.append(y,
-                    #2*np.sin(values) -3*np.cos(3*values) +np.exp(-values*values) -2.3*np.sin(3*values))
-                    np.exp(-(values-4)*(values-4))+np.exp(-3*(values-1))+np.log(values))
+                    2*np.sin(values) -3*np.cos(3*values) +np.exp(-values*values) -2.3*np.sin(3*values))
+                    #np.exp(-(values-4)*(values-4))+np.exp(-3*(values-1))+np.log(values))
     return y
 
 def saveConfig(model, distance, width):
@@ -202,9 +203,9 @@ def startFromScrap(xMax,epochs,savePlot):
     trainings_outputs = wishFunction(inputs)
 
     # Distribute centers evenly
-    distanceBetween = 0.3
+    distanceBetween = 1
     centers = np.arange(0,xmax,distanceBetween)
-    width = distanceBetween*0.6
+    width = distanceBetween*0.65
     # get Model
     myRbf = getModel(1,centers,width,1)
 
@@ -214,12 +215,12 @@ def startFromScrap(xMax,epochs,savePlot):
     myRbf.calculateWeights(inputs,trainings_outputs)
 
     # plot initial fit with only the estimated weights
-    plotRange =np.arange(0.5,xmax,0.001)
+    plotRange =np.arange(0.5,xmax,0.01)
     oldGuess = plotWithoutGrad(myRbf,plotRange)
 
     # Performe grad descent
     numEpochs = epochs
-    gradRange = np.arange(0.5,xmax,0.5)
+    gradRange = np.arange(0.1,xmax,0.1)
     performeGrad(myRbf, numEpochs, gradRange)
 
     # save calculated weights
@@ -236,7 +237,9 @@ if __name__ == "__main__":
     #startFromScrap(14,1,True)
     # get plots with respect to numEpochs
     #for epoch in range(30):
-    startFromScrap(15,10,False)
+
+    # startFromScrap(xMax, epochs, saveplot)
+    startFromScrap(12,8,False)
     #plt.plot(wishFunction(np.arange(0.5,15,0.5)))
     #plt.show()
     # load weights and centers

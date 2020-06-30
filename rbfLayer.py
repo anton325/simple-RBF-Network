@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 
 
 class RBFLayer:
+    """
+    save centers and widths
+    save number of neurons
+    """
     def __init__(self, centers, widths):
         self.centers = centers
         self.widths = widths
@@ -11,26 +15,28 @@ class RBFLayer:
         self.numberOfNeurons = np.size(self.centers)
 
     """
-    get output matrix. 
+    Calculate output matrix to given input 
     columns: the neurons
     rows: response of the neurons to a given input
     """
     def outputMatrix(self,input):
         out = np.array([])
         print("")
+        # for each input
         for i in range(np.size(input)):
+            # for each rbf neuron
             for j in range(np.size(self.centers)):
-                # first do it all for input1, than for input2...
+                # get distance                
                 dis = self.distance(input[i],self.centers[j])
-                #print("dis: "+str(dis))
+                # get activation
                 gaus = self.gaussian(dis)
-                #print("gaus: "+str(gaus))
-                if gaus<0.001:
+                # ignore small values
+                if gaus<0.01:
                     gaus = 0
                 out = np.append(out,gaus)
                 print("")
             print("")
-        print("out direkt nach schleifen: \n"+str(out))
+        print("Activation matrix of rbf layer: \n"+str(out))
         
         # reshape output
         # reshape: anzahl spalten = anzahl neuronen
@@ -53,6 +59,7 @@ class RBFLayer:
 
     """
     get output of single neuron
+    @center: which neuron
     """
     def getOutputOfSingleNeuron(self,center,scalar):
         dis = self.distance(scalar,center)
@@ -88,7 +95,7 @@ class RBFLayer:
         ax = plt.gca()
         ax.cla()
         for i in range(np.size(self.centers)):
-            ax.add_artist(plt.Circle((self.centers[i],0),self.widths, color = "b"))
+            ax.add_artist(plt.Circle((self.centers[i],0),self.widths, color = "y", alpha = 0.5))
         
         print("Plot circles")
         ax.plot()
@@ -106,7 +113,7 @@ if __name__ == "__main__":
         print(str(x)+" "+str(y))
     rbfL = RBFLayer(centers,widths)
 
-    print(rbfL.outputMatrix(inputs))
-    print(centers)
+    print("With new layout: \n"+str(rbfL.outputMatrix(inputs)))
+    print("centers: "+str(centers))
     print("end")
     
