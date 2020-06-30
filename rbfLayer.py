@@ -16,19 +16,20 @@ class RBFLayer:
     
     def outputMatrix(self,input):
         """
-        get output matrix. 
+        get output matrix
         columns: the neurons
         rows: response of the neurons to a given input
         """
         out = np.array([])
         print("")
         for i in range(np.size(input)):
+            # for each input
             for j in range(np.size(self.centers)):
-                # first do it all for input1, than for input2...
+                # for each center
                 dis = self.distance(input[i],self.centers[j])
-                #print("dis: "+str(dis))
                 gaus = self.gaussian(dis)
-                #print("gaus: "+str(gaus))
+                
+                # ignore very small values
                 if gaus<0.001:
                     gaus = 0
                 out = np.append(out,gaus)
@@ -37,8 +38,8 @@ class RBFLayer:
         print("Activation matrix of rbf layer: \n"+str(out))
 
         # reshape output
-        # reshape: anzahl spalten = anzahl neuronen
-        #          anzahl zeilen = anzahl inputs
+        # reshape: number of columns = anzahl neuronen
+        #          number of rows= anzahl inputs
         out = np.reshape(out,(np.size(input),np.size(self.centers)))
         return out
 
@@ -48,7 +49,6 @@ class RBFLayer:
         """
         Get missing output to arbitrary scalar
         """
-        #print("scalar: "+str(scalar))
         singleValues = np.array([])
         for j in range(np.size(self.centers)):
             neuronOutput = self.getOutputOfSingleNeuron(self.centers[j], scalar)
@@ -72,10 +72,6 @@ class RBFLayer:
         calculate distance between input and neuron
         """
         dis = np.abs(x-center)
-        #print("center: "+str(center)+" x: "+str(x))
-        """for xValue,c in x,center:
-            dis = dis + np.square(xValue-c)
-        dis = np.sqrt(dis)"""
         return dis
 
     
@@ -90,9 +86,10 @@ class RBFLayer:
         return res
 
     
+    
     def plotNeurons(self):
         """
-        draw the neurons on the input (1D)
+        draw the neurons in the plot (1D)
         """    
         ax = plt.gca()
         ax.cla()
