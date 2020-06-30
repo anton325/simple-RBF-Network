@@ -33,7 +33,7 @@ class RBF:
         #print("matrixM: "+str(matrixM)+" training outputs: "+str(trainings_outputs))
         #print("Training outputs hat die shape: "+str(trainings_outputs.shape))
         self.weightsWithoutGradient = np.dot(matrixM,trainOutput)
-        print("berchnet wurden die gewichte: "+str(self.weightsWithoutGradient))
+        print("berchnet wurden die gewichte: \n"+str(self.weightsWithoutGradient))
 
         # tell output layer
         self.outputLayer.introduceWeightMatrix(self.weightsWithoutGradient)
@@ -54,7 +54,7 @@ class RBF:
 
 
 
-    def gradientDescent(self, teachingInput, teachingOutput, epoch):
+    def gradientDescent(self, teachingInput, teachingOutput, epoch, saveAfterEachEpoch):
         #start timer
         t1 = time.time()
 
@@ -88,16 +88,17 @@ class RBF:
                     self.weightsWithGradient[neuron] = self.weightsWithGradient[neuron]+grad
 
                     
-                i = i + 1
+                #i = i + 1
 
             #tell outputlayer
             self.outputLayer.introduceWeightMatrix(self.weightsWithGradient)
+            if saveAfterEachEpoch:
+                plotWithGrad(self,teachingInput,teachingOutput,True, counter)
+
 
             # increment counter
             counter = counter + 1
 
-        # tell output layer about new weights
-        self.outputLayer.introduceWeightMatrix(self.weightsWithGradient)   
         t2 = time.time()
         print("Gradient descent took: "+str(t2-t1)+" s")
 
@@ -115,8 +116,7 @@ def wishFunction(x):
     y = np.array([])
     for values in x: 
         y = np.append(y,
-                    #2*np.sin(values) -3*np.cos(3*values) +np.exp(-values*values) -2.3*np.sin(3*values))
-                    np.exp(-(values-4)*(values-4))+np.exp(-3*(values-1))+np.log(values))
+                    np.square(2*np.sin(values) -3*np.cos(3*values) +np.exp(-values*values) -2.3*np.sin(3*values)-np.exp(-(values-4)*(values-4))+np.exp(-3*(values-1))+np.log(values)))
     return y
 
 def saveConfig(model, distance, width):
@@ -171,7 +171,7 @@ def plotWithGrad(myRbf,x,oldGuess,savePlot,epochs):
 
     if savePlot == True:
         script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-        rel_path = "Plots/onlineLearning3/Epochs "+str(epochs)+".png"
+        rel_path = "Plots/0630/Epochs "+str(epochs)+".png"
         abs_file_path = os.path.join(script_dir, rel_path)      
         plt.savefig(abs_file_path)
         print("Plot saved")
@@ -179,11 +179,10 @@ def plotWithGrad(myRbf,x,oldGuess,savePlot,epochs):
         plt.show()
 
 
-def performeGrad(rbf,numEpochs, usedRange):
+def performeGrad(rbf,numEpochs, usedRange, saveAfterEachEpoch):
     # performe grad
-    rbf.gradientDescent(usedRange, wishFunction(usedRange), numEpochs)
-    # save new weights
-    rbf.outputLayer.introduceWeightMatrix(rbf.weightsWithGradient)
+    rbf.gradientDescent(usedRange, wishFunction(usedRange), numEpochs, saveAfterEachEpoch)
+   
 
 def getModel(numInputNeurons,centers,width,numOutputNeurons):
      # define single layers
@@ -219,8 +218,8 @@ def startFromScrap(xMax,epochs,savePlot):
 
     # Performe grad descent
     numEpochs = epochs
-    gradRange = np.arange(0.5,xmax,0.5)
-    performeGrad(myRbf, numEpochs, gradRange)
+    gradRange = np.arange(0.2,xmax,0.1)
+    performeGrad(myRbf, numEpochs, gradRange,savePlot)
 
     # save calculated weights
     #saveConfig(myRbf, distanceBetween,width)
@@ -235,9 +234,8 @@ def startFromScrap(xMax,epochs,savePlot):
 if __name__ == "__main__":
     #startFromScrap(14,1,True)
     # get plots with respect to numEpochs
-    #for epoch in range(30):
-    startFromScrap(15,10,False)
-    #plt.plot(wishFunction(np.arange(0.5,15,0.5)))
+    startFromScrap(15,25,True)
+    #plt.plot(wishFunction(np.arange(0.5,15,0.01)))
     #plt.show()
     # load weights and centers
     #weights,centers = loadWeights()
