@@ -10,7 +10,7 @@ class RBF:
     def __init__(self,inputLayer,RBFLayer,outputLayer):
         """
         __ini__
-        Übergebe definierte Layers
+        Pre-defined layers as parameters that just have to be saved
         """
         self.inputLayer = inputLayer
         self.RBFLayer = RBFLayer
@@ -20,7 +20,8 @@ class RBF:
     def calculateWeights(self,input, trainOutput):
         """
         calculateWeights
-        calculate the weights by getting the M matrix, obtaining the pseudo inverse and multiplying with training output
+        calculate the weights by getting the M matrix, obtaining the pseudo inverse and multiplying
+        with training output
         """
         matrixM = self.RBFLayer.outputMatrix(input)
         # invert matrix
@@ -47,55 +48,82 @@ class RBF:
 
 
     def gradientDescent(self, teachingInput, teachingOutput, epoch, saveAfterEachEpoch):
+        """
+        perform the gradient descent algorithm
+        @teachingInput: The training input
+        @teachingOutput: The training output (desired output to training input)
+        @epoch: How many times to repeat the whole process
+        @saveAfterEachEpoch: If true plot is saved after each successful epoch
+        """
+        # save teaching in and output
+        origInput = np.copy(teachingInput)
+        origOutput = np.copy(teachingOutput)
+
         #start timer
         t1 = time.time()
 
-        # speed between 0.01 and 0.9
+        # speed of algo between 0.01 and 0.9
         speed = 0.9
 
-        print("gradient descent")
+        print("Performing gradient descent...")
         counter = 0
         self.weightsWithGradient = self.weightsWithoutGradient
 
-        # calculate delta
+        # calculate delta and refresh weights
         while counter < epoch:
             for i in range(np.size(teachingInput)):
                 for neuron in range(self.RBFLayer.numberOfNeurons):
                     # calculate activation of the single neuron:
                     center = self.RBFLayer.centers[neuron]
-                    eingang =  teachingInput[i]
-                    activation = self.RBFLayer.getOutputOfSingleNeuron(center , eingang)
-                    print("Test in iteration: "+str(counter+1)+" of "+str(epoch)+ " for input: "+str(eingang))
+                    trainingInput =  teachingInput[i]
+                    activation = self.RBFLayer.getOutputOfSingleNeuron(center , trainingInput)
+                    #print("Test in iteration: "+str(counter+1)+" of "+str(epoch)+ " for input: "+str(trainingInput))
 
                     # what would the network usually guess?
                     guess = self.guessOutput(teachingInput[i])
-                    print("guess would have been: "+str(guess)+ " it should have been: "+str(teachingOutput[i]))
+                    #print("Guess would have been: "+str(guess)+ " it should have been: "+str(teachingOutput[i]))
                     # calculate difference
                     diff = teachingOutput[i]-guess
                     # calculate gradient
                     grad = speed*diff*activation
 
-                    print("Zum Input: "+str(teachingInput[i])+" ist der Unterschied: "+str(diff)+" grad: "+str(grad))
+                    #print("Zum Input: "+str(teachingInput[i])+" ist der Unterschied: "+str(diff)+" grad: "+str(grad))
                     # update the respective weight:
                     self.weightsWithGradient[neuron] = self.weightsWithGradient[neuron]+grad
+
+                #tell outputlayer # online learning (after EACH and EVERY set)
+                self.outputLayer.introduceWeightMatrix(self.weightsWithGradient)
+
 
                     
             # adjust speed after each epoch
             speed = 0.95 * speed
 
-            #tell outputlayer
-            self.outputLayer.introduceWeightMatrix(self.weightsWithGradient)
+            #tell outputlayer # offline learning (after a whole epoch)
 
             if saveAfterEachEpoch:
-                plotWithGrad(self,teachingInput,teachingOutput,True, counter)
+                plotWithGrad(self,origInput,origOutput,True, counter)
 
 
             # increment counter
             counter = counter + 1
 
+            #randomize trainingsdata
+            #teachingInput, teachingOutput = randomizeTrainingData(teachingInput,teachingOutput)
+            print("\t Finished epoch "+str(counter))
+
         t2 = time.time()
         print("Gradient descent took: "+str(t2-t1)+" s")
 
+
+def randomizeTrainingData(inputs, outputs):
+    length = len(inputs)
+    for x in range(20):#int(length/2)+1):
+        new1 = np.random.randint(0,length)
+        new2 = np.random.randint(0,length)
+        inputs[new1], inputs[new2] = inputs[new2],inputs[new1]
+        outputs[new1], outputs[new2] = outputs[new2],outputs[new1]
+    return inputs,outputs
 
 
 
@@ -181,10 +209,10 @@ def plotWithGrad(myRbf,x,oldGuess,savePlot,epochs):
 
     if savePlot == True:
         script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-        rel_path = "Plots/06301/Epochs "+str(epochs)+".png"
+        rel_path = "Plots/Save/Epoch "+str(epochs)+".png"
         abs_file_path = os.path.join(script_dir, rel_path)      
         plt.savefig(abs_file_path)
-        print("Plot saved")
+        #print("\t Plot saved")
     else:
         plt.show()
 
@@ -239,13 +267,13 @@ def measureAcc(model, inputs, desiredOutputs, margin):
 def startFromScrap(xMax,epochs,distanceBetweenInputs,gradSteps,distanceBetweenCenters,savePlot):
     # Determine with how many values you want to estimate first set of weights
     xmax = xMax
-    inputs = np.arange(0.1,xmax,distanceBetweenInputs)
+    inputs = np.arange(0.05,xmax,distanceBetweenInputs)
     trainings_outputs = wishFunction(inputs)
 
     # Distribute centers evenly
     distanceBetween = distanceBetweenCenters
     centers = np.arange(0,xmax,distanceBetween)
-    width = distanceBetween*0.6
+    width = distanceBetween*0.66 # as recommended in the paper 66%
     # get Model
     myRbf = getModel(1,centers,width,1)
 
@@ -255,12 +283,12 @@ def startFromScrap(xMax,epochs,distanceBetweenInputs,gradSteps,distanceBetweenCe
     myRbf.calculateWeights(inputs,trainings_outputs)
 
     # plot initial fit with only the estimated weights
-    plotRange =np.arange(0.5,xmax,0.001)
+    plotRange =np.arange(0.05,xmax,0.005)
     oldGuess = plotWithoutGrad(myRbf,plotRange)
 
     # Performe grad descent
     numEpochs = epochs
-    gradRange = np.arange(0.2,xmax,gradSteps)
+    gradRange = np.arange(0.05,xmax,gradSteps)
     performeGrad(myRbf, numEpochs, gradRange,savePlot)
 
     # save calculated weights
@@ -269,7 +297,7 @@ def startFromScrap(xMax,epochs,distanceBetweenInputs,gradSteps,distanceBetweenCe
      # plot with new AND old weights
     plotWithGrad(myRbf,plotRange,oldGuess,savePlot,numEpochs)
     margin = 0.1 # in percent
-    print("The accuracity with margin "+str(margin)+ " is : " +str(measureAcc(myRbf,gradRange,wishFunction(gradRange),margin))+"%")
+    #print("The accuracity with margin "+str(margin)+ " is : " +str(measureAcc(myRbf,gradRange,wishFunction(gradRange),margin))+"%")
 
 
 
@@ -278,7 +306,9 @@ def startFromScrap(xMax,epochs,distanceBetweenInputs,gradSteps,distanceBetweenCe
 if __name__ == "__main__":
     # get plots with respect to numEpochs
     # startFromScrap(xMax, epochs,distanceBetweenInputs, gradSteps, distanceBetweenCenters, savePlotAfterEachIteration)
-    startFromScrap(15, 15, 0.01, 0.25, 0.4, True)
+    startFromScrap(15, 20, 1, 0.1, 0.35, True)
+    
+
 
     #plt.plot(wishFunction(np.arange(0.5,15,0.01)))
     #plt.show()

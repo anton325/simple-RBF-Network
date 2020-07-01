@@ -35,12 +35,13 @@ class RBFLayer:
                 out = np.append(out,gaus)
                 print("")
             print("")
-        print("Activation matrix of rbf layer: \n"+str(out))
 
         # reshape output
         # reshape: number of columns = anzahl neuronen
         #          number of rows= anzahl inputs
         out = np.reshape(out,(np.size(input),np.size(self.centers)))
+        print("Activation matrix of rbf layer: \n"+str(out))
+
         return out
 
 
@@ -96,7 +97,7 @@ class RBFLayer:
         for i in range(np.size(self.centers)):
             ax.add_artist(plt.Circle((self.centers[i],0),self.widths, color = "b"))
         
-        print("Plot circles")
+        #print("Plot circles")
         ax.plot()
 
 
