@@ -94,11 +94,6 @@ class RBF:
                 #tell outputlayer # online learning (after EACH and EVERY set)
                 self.outputLayer.introduceWeightMatrix(self.weightsWithGradient)
 
-
-                    
-            # adjust speed after each epoch
-            speed = 0.95 * speed
-
             #tell outputlayer # offline learning (after a whole epoch)
 
             if saveAfterEachEpoch:
@@ -109,8 +104,11 @@ class RBF:
             counter = counter + 1
 
             #randomize trainingsdata
-            #teachingInput, teachingOutput = randomizeTrainingData(teachingInput,teachingOutput)
-            print("\t Finished epoch "+str(counter))
+            teachingInput, teachingOutput = randomizeTrainingData(teachingInput,teachingOutput)
+            print("\t Finished epoch "+str(counter)+" von "+str(epoch) + " with speed "+str(speed))
+
+            # adjust speed after each epoch
+            speed = 0.9 * speed
 
         t2 = time.time()
         print("Gradient descent took: "+str(t2-t1)+" s")
@@ -118,7 +116,7 @@ class RBF:
 
 def randomizeTrainingData(inputs, outputs):
     length = len(inputs)
-    for x in range(20):#int(length/2)+1):
+    for x in range(int(length)):
         new1 = np.random.randint(0,length)
         new2 = np.random.randint(0,length)
         inputs[new1], inputs[new2] = inputs[new2],inputs[new1]
@@ -306,10 +304,8 @@ def startFromScrap(xMax,epochs,distanceBetweenInputs,gradSteps,distanceBetweenCe
 if __name__ == "__main__":
     # get plots with respect to numEpochs
     # startFromScrap(xMax, epochs,distanceBetweenInputs, gradSteps, distanceBetweenCenters, savePlotAfterEachIteration)
-    startFromScrap(15, 20, 1, 0.1, 0.35, True)
+    startFromScrap(25, 25, 1, 0.1, 0.35, True)
     
-
-
     #plt.plot(wishFunction(np.arange(0.5,15,0.01)))
     #plt.show()
 

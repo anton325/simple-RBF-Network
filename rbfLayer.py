@@ -21,7 +21,6 @@ class RBFLayer:
         rows: response of the neurons to a given input
         """
         out = np.array([])
-        print("")
         for i in range(np.size(input)):
             # for each input
             for j in range(np.size(self.centers)):
@@ -33,8 +32,6 @@ class RBFLayer:
                 if gaus<0.001:
                     gaus = 0
                 out = np.append(out,gaus)
-                print("")
-            print("")
 
         # reshape output
         # reshape: number of columns = anzahl neuronen
