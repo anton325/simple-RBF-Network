@@ -1,7 +1,0 @@
-# gitignore
-# ignore all the plots
-Plots/
-# ignore stupid little files
-__pycache__/
-.DS_Store
-.vscode/
