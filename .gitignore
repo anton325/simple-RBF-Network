@@ -1,1 +1,3 @@
-/Plots
+# gitignore
+# ignore all the plots
+/Plots/*
