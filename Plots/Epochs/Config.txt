@@ -1,5 +1,0 @@
-xmax = 14
-distance between = 0.7
-Width = 0.6*distanceBetween
-gradRange = step 0.25
-Speed = 0.9 and 0.9*speed
