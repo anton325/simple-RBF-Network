@@ -116,7 +116,7 @@ class RBF:
 
 def randomizeTrainingData(inputs, outputs):
     length = len(inputs)
-    for x in range(int(length)):
+    for x in range(int(2*length)):
         new1 = np.random.randint(0,length)
         new2 = np.random.randint(0,length)
         inputs[new1], inputs[new2] = inputs[new2],inputs[new1]
@@ -136,7 +136,7 @@ def wishFunction(x):
     y = np.array([])
     for values in x: 
         y = np.append(y,
-                    np.square(2*np.sin(values) -3*np.cos(3*values) +np.exp(-values*values) -2.3*np.sin(3*values)-np.exp(-(values-4)*(values-4))+np.exp(-3*(values-1))+np.log(values))
+                    np.square(2*np.sin(values) -3*np.cos(3*values) +np.exp(-values*values) -2.3*np.sin(3*values)-np.exp(-(values-4)*(values-4))+np.exp(-3*(values-1))+np.log(values))-10
                     #np.sqrt(values)
                     )
     return y
@@ -191,9 +191,10 @@ def plotWithGrad(myRbf,x,oldGuess,savePlot,epochs):
     Plot the desired function and how the model models it
     if savePlot is true the picture is saved instead of shown
     """
+    maxX = np.amax(x)
     correct = np.array([])
     newGuessed = np.array([])
-    usedRange = x
+    usedRange = np.arange(0.01,maxX,0.01)
     for testInput in usedRange:
         newGuessed = np.append(newGuessed, myRbf.guessOutput(testInput))
         correct = np.append(correct, wishFunction(testInput))
@@ -201,7 +202,7 @@ def plotWithGrad(myRbf,x,oldGuess,savePlot,epochs):
     # show input neurons
     myRbf.RBFLayer.plotNeurons()
     
-    plt.plot(usedRange,oldGuess, color = "r")
+    #plt.plot(x,oldGuess, color = "r")
     plt.plot(usedRange,correct, color = "g")
     plt.plot(usedRange,newGuessed, color = "b")   
 
@@ -241,18 +242,18 @@ def measureAcc(model, inputs, desiredOutputs, margin):
     Measure how well the model suits the wish function
     """
     numInputs = len(inputs)
-    print("Num inputs:")
-    print(numInputs)
+    #print("Number of inputs:")
+    #print(numInputs)
     outOfMargin = 0
     counter = 0
     for input in inputs:
         guess = model.guessOutput(input)
         distance = abs(desiredOutputs[counter]-guess)
-        if distance>guess*margin:
-            print("passt nicht: ")
-            print(guess)
-            print(distance)
-            print(desiredOutputs[counter])
+        if distance>margin:#guess*margin:
+            #print("passt nicht: ")
+            #print(guess)
+            #print(distance)
+            #print(desiredOutputs[counter])
             outOfMargin = outOfMargin + 1
             
         counter = counter + 1
@@ -294,8 +295,8 @@ def startFromScrap(xMax,epochs,distanceBetweenInputs,gradSteps,distanceBetweenCe
 
      # plot with new AND old weights
     plotWithGrad(myRbf,plotRange,oldGuess,savePlot,numEpochs)
-    margin = 0.1 # in percent
-    #print("The accuracity with margin "+str(margin)+ " is : " +str(measureAcc(myRbf,gradRange,wishFunction(gradRange),margin))+"%")
+    margin = 2 # in absolute
+    print("The accuracity with margin "+str(margin)+ " is : " +str(round(measureAcc(myRbf,gradRange,wishFunction(gradRange),margin),2))+"%")
 
 
 
@@ -304,7 +305,7 @@ def startFromScrap(xMax,epochs,distanceBetweenInputs,gradSteps,distanceBetweenCe
 if __name__ == "__main__":
     # get plots with respect to numEpochs
     # startFromScrap(xMax, epochs,distanceBetweenInputs, gradSteps, distanceBetweenCenters, savePlotAfterEachIteration)
-    startFromScrap(25, 25, 1, 0.1, 0.35, True)
+    startFromScrap(15, 25, 5, 0.25, 0.4, True)
     
     #plt.plot(wishFunction(np.arange(0.5,15,0.01)))
     #plt.show()
