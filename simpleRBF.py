@@ -305,7 +305,7 @@ def startFromScrap(xMax,epochs,distanceBetweenInputs,gradSteps,distanceBetweenCe
 if __name__ == "__main__":
     # get plots with respect to numEpochs
     # startFromScrap(xMax, epochs,distanceBetweenInputs, gradSteps, distanceBetweenCenters, savePlotAfterEachIteration)
-    startFromScrap(15, 25, 5, 0.25, 0.4, True)
+    startFromScrap(15, 10, 1, 0.25, 0.4, True)
     
     #plt.plot(wishFunction(np.arange(0.5,15,0.01)))
     #plt.show()
